@@ -1,27 +1,44 @@
 package com.github.bintenkuu.jdbcorm.table;
 
 import com.github.bintenkuu.jdbcorm.exception.SqlException;
+import com.github.bintenkuu.jdbcorm.sqlparam.ParameterHandler;
 import com.github.bintenkuu.jdbcorm.type.ResultSetHandler;
+import com.github.bintenkuu.jdbcorm.type.TypeHandler;
 import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author bin
  * @since 2023/10/09
  */
-@RequiredArgsConstructor
 public class Expression {
-    private final PreparedStatement preparedStatement;
     private final TypeHandlerRegistry typeHandlerRegistry;
-    private int parameterCount = -1;
+    private final PreparedStatement preparedStatement;
+    private final List<ParameterHandler<?>> sqlPrepareList;
+    private final List<TypeHandler<?>> typeHandlerList;
 
-    public <E> List<E> executeQuery(ResultSetHandler<E> handler) {
+    public Expression(
+            TypeHandlerRegistry typeHandlerRegistry,
+            PreparedStatement preparedStatement,
+            List<ParameterHandler<?>> sqlPrepareList,
+            List<TypeHandler<?>> typeHandlerList
+    ) {
+        this.typeHandlerRegistry = typeHandlerRegistry;
+        this.preparedStatement = preparedStatement;
+        this.sqlPrepareList = sqlPrepareList;
+        this.typeHandlerList = typeHandlerList;
+    }
+
+    public Expression(TypeHandlerRegistry typeHandlerRegistry, PreparedStatement preparedStatement) {
+        this(typeHandlerRegistry, preparedStatement, Collections.emptyList(), Collections.emptyList());
+    }
+
+    public <E> List<E> executeQuery(ResultSetHandler<E> handler) throws SqlException {
         try (preparedStatement) {
             return executeQueryBatch(handler);
         } catch (SQLException ex) {
@@ -29,11 +46,11 @@ public class Expression {
         }
     }
 
-    public <E> List<E> executeQueryBatch(ResultSetHandler<E> handler) {
-        return Transaction.executeQuery(preparedStatement, handler, typeHandlerRegistry);
+    public <E> List<E> executeQueryBatch(ResultSetHandler<E> handler) throws SqlException {
+        return OrmTransaction.executeQuery(preparedStatement, handler, typeHandlerRegistry);
     }
 
-    public int executeUpdate() {
+    public int executeUpdate() throws SqlException {
         try (preparedStatement) {
             return executeUpdateBatch();
         } catch (SQLException ex) {
@@ -41,7 +58,7 @@ public class Expression {
         }
     }
 
-    public int executeUpdateBatch() {
+    public int executeUpdateBatch() throws SqlException {
         try {
             return preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -49,7 +66,7 @@ public class Expression {
         }
     }
 
-    public boolean execute() {
+    public boolean execute() throws SqlException {
         try (preparedStatement) {
             return executeBatch();
         } catch (SQLException ex) {
@@ -57,7 +74,7 @@ public class Expression {
         }
     }
 
-    public boolean executeBatch() {
+    public boolean executeBatch() throws SqlException {
         try {
             return preparedStatement.execute();
         } catch (SQLException ex) {
@@ -65,18 +82,7 @@ public class Expression {
         }
     }
 
-    private void initCached() {
-        try {
-            if (parameterCount < 0) {
-                val metaData = preparedStatement.getParameterMetaData();
-                parameterCount = metaData.getParameterCount();
-            }
-        } catch (SQLException ex) {
-            throw new SqlException(ex);
-        }
-    }
-
-    public void clearBatch() {
+    public void clearBatch() throws SqlException {
         try {
             preparedStatement.clearBatch();
         } catch (SQLException ex) {
@@ -84,7 +90,7 @@ public class Expression {
         }
     }
 
-    public void addBatch() {
+    public void addBatch() throws SqlException {
         try {
             preparedStatement.addBatch();
         } catch (SQLException ex) {
@@ -96,24 +102,16 @@ public class Expression {
         setParameters(parameters);
     }
 
-    public <E> void setParameters(E[] parameters) {
-        initCached();
-        if (parameters == null || parameterCount != parameters.length) {
-            throw new SqlException("parameters size not match");
-        }
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <E> void setParameters(E[] parameters) throws SqlException {
         try {
-            val ps = preparedStatement;
-            for (int index = 1, length = parameters.length; index <= length; index++) {
-                Object value = parameters[index - 1];
-                if (value == null) {
-                    ps.setNull(index, Types.VARCHAR);
-                } else {
-                    val typeHandler = typeHandlerRegistry.getTypeHandler(value.getClass(), 0);
-                    if (typeHandler != null) {
-                        typeHandler.setParameter(ps, index, value);
-                    } else {
-                        ps.setObject(index, value);
-                    }
+            int objIndex = 0;
+            int index = 1;
+            val typeHandlerIter = typeHandlerList.iterator();
+            for (ParameterHandler prepare : sqlPrepareList) {
+                val objects = prepare.handleParam(parameters[objIndex++]);
+                for (Object object : objects) {
+                    ((TypeHandler<Object>) typeHandlerIter.next()).setParameter(preparedStatement, index++, object);
                 }
             }
         } catch (SQLException ex) {
@@ -121,7 +119,7 @@ public class Expression {
         }
     }
 
-    public void setParameters(List<?> parameters) {
+    public void setParameters(List<?> parameters) throws SqlException {
         setParameters(parameters.toArray());
     }
 }

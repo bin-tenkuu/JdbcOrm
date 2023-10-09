@@ -1,5 +1,7 @@
 package com.github.bintenkuu.jdbcorm.exception;
 
+import java.sql.SQLException;
+
 /**
  * @author bin
  * @since 2023/10/09
@@ -9,11 +11,12 @@ public class SqlException extends RuntimeException {
         super(message);
     }
 
-    public SqlException(String message, Throwable cause) {
-        super(message, cause);
+    public SqlException(SQLException cause) {
+        super(cause);
     }
 
-    public SqlException(Throwable cause) {
-        super(cause);
+    @Override
+    public SQLException getCause() {
+        return (SQLException) super.getCause();
     }
 }

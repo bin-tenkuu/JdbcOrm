@@ -1,6 +1,7 @@
 import com.github.bintenkuu.jdbcorm.table.Column;
+import com.github.bintenkuu.jdbcorm.table.OrmFactory;
 import com.github.bintenkuu.jdbcorm.table.Table;
-import com.github.bintenkuu.jdbcorm.table.Transaction;
+import com.github.bintenkuu.jdbcorm.table.OrmTransaction;
 import com.github.bintenkuu.jdbcorm.type.ObjectTypeHandler;
 import lombok.*;
 import org.junit.*;
@@ -9,7 +10,6 @@ import org.sqlite.SQLiteDataSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
 
 /**
  * @author bin
@@ -20,6 +20,7 @@ public class AllTest {
     @Rule
     public CustomStopwatch stopwatch = new CustomStopwatch();
     private static SQLiteDataSource dataSource;
+    private static OrmFactory ormFactory;
 
     @Getter
     @Setter
@@ -38,7 +39,7 @@ public class AllTest {
     public static void init() {
         dataSource = new SQLiteDataSource();
         dataSource.setUrl("jdbc:sqlite:db.sqlite3");
-        try (val transaction = Transaction.of(dataSource)) {
+        try (val transaction = OrmTransaction.of(dataSource)) {
             transaction.execute("""
                         CREATE TABLE IF NOT EXISTS test_table (
                             id INTEGER PRIMARY KEY,
@@ -57,13 +58,12 @@ public class AllTest {
 
     @Test
     public void testBatch() {
-        try (val transaction = Transaction.of(dataSource)) {
-            val expression = transaction.process(
-                    "insert OR ignore into test_table (id, name) values (?, ?)"
-            );
+        try (val transaction = OrmTransaction.of(dataSource)) {
+            val expression = transaction
+                    . "insert OR ignore into test_table (\{ TestTable.TABLE.all() }) values (\{ TestTable.ID }, \{ TestTable.NAME })" ;
             int batch = 0;
-            for (int i = 1; i < 1000000; i++, batch++) {
-                expression.setParams(i, i);
+            for (int i = 1; i < 100000; i++, batch++) {
+                expression.setParams((long) i, String.valueOf(i));
                 if (batch >= 512) {
                     expression.executeUpdateBatch();
                     expression.clearBatch();
@@ -82,10 +82,11 @@ public class AllTest {
 
     @Test
     public void testTypeHandler() {
-        try (val transaction = Transaction.of(dataSource)) {
-            val list = transaction
-                    . "select name from test_table where id = \{ 0 }"
-                    .executeQuery(new ObjectTypeHandler());
+        try (val transaction = OrmTransaction.of(dataSource)) {
+            val expression = transaction
+                    . "select name from test_table where id = \{ Integer.class }" ;
+            expression.setParams(0);
+            val list = expression.executeQuery(new ObjectTypeHandler());
             Assert.assertEquals(
                     "size is not 1",
                     1, list.size()
@@ -98,7 +99,7 @@ public class AllTest {
 
     @Test
     public void testTable() {
-        try (val transaction = Transaction.of(dataSource)) {
+        try (val transaction = OrmTransaction.of(dataSource)) {
             val list = transaction
                     . "select * from test_table where id = \{ 0 }"
                     .executeQuery(TestTable.TABLE);
@@ -115,7 +116,7 @@ public class AllTest {
 
     @Test
     public void testColumn() {
-        try (val transaction = Transaction.of(dataSource)) {
+        try (val transaction = OrmTransaction.of(dataSource)) {
             val list = transaction
                     . "select * from test_table where id = \{ 0 }"
                     .executeQuery(TestTable.ID);

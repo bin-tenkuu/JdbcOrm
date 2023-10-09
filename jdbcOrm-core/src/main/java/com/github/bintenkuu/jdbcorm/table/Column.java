@@ -1,5 +1,7 @@
 package com.github.bintenkuu.jdbcorm.table;
 
+import com.github.bintenkuu.jdbcorm.sqlparam.ParameterHandler;
+import com.github.bintenkuu.jdbcorm.sqlparam.SqlHandler;
 import com.github.bintenkuu.jdbcorm.type.ResultSetHandler;
 import com.github.bintenkuu.jdbcorm.type.TypeHandler;
 import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
@@ -10,16 +12,16 @@ import lombok.val;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 @Getter
 @AllArgsConstructor
-public class Column<E, T> implements ResultSetHandler<T> {
+public class Column<E, T> implements ResultSetHandler<T>, ParameterHandler<T> {
     private final String name;
     private final Class<T> typeClass;
     private final BiConsumer<E, T> setter;
-//        private TypeHandler<T> typeHandler;
 
     public static <E, T> Column<E, T> of(
             String name, Class<T> clazz,
@@ -60,5 +62,24 @@ public class Column<E, T> implements ResultSetHandler<T> {
             }
         }
         return list;
+    }
+
+    public SqlHandler raw() {
+        return SqlHandler.raw(name);
+    }
+
+    @Override
+    public void handleSql(StringBuilder sql) {
+        sql.append("?");
+    }
+
+    @Override
+    public void handleTypeHandlerList(TypeHandlerRegistry typeHandlerRegistry, List<TypeHandler<?>> typeHandlerList) {
+        typeHandlerList.add(typeHandlerRegistry.getTypeHandler(typeClass));
+    }
+
+    @Override
+    public List<T> handleParam(T obj) {
+        return Collections.singletonList(obj);
     }
 }

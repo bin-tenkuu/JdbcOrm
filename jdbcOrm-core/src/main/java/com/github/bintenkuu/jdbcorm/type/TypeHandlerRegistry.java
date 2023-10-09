@@ -6,9 +6,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.time.*;
 import java.time.chrono.JapaneseDate;
 import java.util.HashMap;
@@ -57,6 +54,13 @@ public class TypeHandlerRegistry {
     public TypeHandlerRegistry() {
     }
 
+    private TypeHandlerRegistry(TypeHandlerRegistry parent) {
+        if (parent != null) {
+            allTypeHandlersMap.putAll(parent.allTypeHandlersMap);
+            allClassTypes.addAll(parent.allClassTypes);
+        }
+    }
+
     public <T> void register(Class<T> clazz, TypeHandler<T> typeHandler) {
         allTypeHandlersMap.put(clazz, typeHandler);
         allClassTypes.add(clazz);
@@ -72,35 +76,58 @@ public class TypeHandlerRegistry {
     }
 
     public <T> TypeHandler<T> getTypeHandler(Type type) {
-        return getTypeHandler(type, 0);
+        return getTypeHandler(this, type, 0);
     }
 
     public <T> TypeHandler<T> getTypeHandler(Class<T> clazz) {
-        return getTypeHandler(clazz, 0);
+        return getTypeHandler(this, clazz, 0);
     }
 
-    /**
-     * @param type {@link java.lang.reflect.Type}
-     * @param code {@link java.sql.Types}
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> TypeHandler<T> getTypeHandler(Type type, int code) {
-        TypeHandler<T> handler = (TypeHandler<T>) allTypeHandlersMap.get(type);
+    @SuppressWarnings({"unchecked"})
+    public static <T> TypeHandler<T> getTypeHandler(TypeHandlerRegistry registry, Type type, int code) {
+        TypeHandler<T> handler = (TypeHandler<T>) registry.allTypeHandlersMap.get(type);
         if (handler != null) {
             return handler;
         }
-        if (type instanceof Class<?> type1) {
-            if (Enum.class.isAssignableFrom(type1)) {
-                return new EnumNameTypeHandler<>((Class) type1);
-            }
-            for (Class<?> aClass : allClassTypes) {
-                if (type1.isAssignableFrom(aClass)) {
-                    return (TypeHandler<T>) allTypeHandlersMap.get(type);
-                }
-            }
+        if (type instanceof Class<?> clazz) {
+            return findTypeHandler(registry, clazz);
         } else if (type instanceof ParameterizedType type1) {
-            return getTypeHandler(type1.getActualTypeArguments()[0], code);
+            return getTypeHandler(registry, type1.getActualTypeArguments()[0], code);
         }
         throw new UnsupportedOperationException("no type handler found for type " + type);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public static <T> TypeHandler<T> getTypeHandler(TypeHandlerRegistry registry, Class<T> clazz, int code) {
+        TypeHandler<T> handler = (TypeHandler<T>) registry.allTypeHandlersMap.get(clazz);
+        if (handler != null) {
+            return handler;
+        }
+        return findTypeHandler(registry, clazz);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <T> TypeHandler<T> findTypeHandler(TypeHandlerRegistry registry, Class<?> clazz) {
+        if (Enum.class.isAssignableFrom(clazz)) {
+            return new EnumNameTypeHandler<>((Class) clazz);
+        }
+        for (Class<?> subClass : registry.allClassTypes) {
+            if (clazz.isAssignableFrom(subClass)) {
+                val allTypeHandlersMap = registry.allTypeHandlersMap;
+                val handler = (TypeHandler<T>) allTypeHandlersMap.get(subClass);
+                // 缓存处理器，避免下次再次反射查找
+                allTypeHandlersMap.put(clazz, handler);
+                return handler;
+            }
+        }
+        throw new UnsupportedOperationException("no type handler found for type " + clazz);
+    }
+
+    public static <T> TypeHandler<T> getTypeHandler(Class<T> clazz, int code) {
+        return getTypeHandler(GLOBAL, clazz, code);
+    }
+
+    public TypeHandlerRegistry copy() {
+        return new TypeHandlerRegistry(this);
     }
 }

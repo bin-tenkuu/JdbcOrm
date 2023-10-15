@@ -1,4 +1,4 @@
-package com.github.bintenkuu.jdbcorm.exception;
+package com.github.bintenkuu.jdbcorm.table;
 
 import java.sql.SQLException;
 

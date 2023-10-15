@@ -1,7 +1,6 @@
 import com.github.bintenkuu.jdbcorm.table.Column;
 import com.github.bintenkuu.jdbcorm.table.OrmFactory;
 import com.github.bintenkuu.jdbcorm.table.Table;
-import com.github.bintenkuu.jdbcorm.table.OrmTransaction;
 import com.github.bintenkuu.jdbcorm.type.ObjectTypeHandler;
 import lombok.*;
 import org.junit.*;
@@ -19,8 +18,11 @@ public class AllTest {
 
     @Rule
     public CustomStopwatch stopwatch = new CustomStopwatch();
-    private static SQLiteDataSource dataSource;
     private static OrmFactory ormFactory;
+
+    private static final Column<TestTable, Long> ID = Column.id(TestTable::setId);
+    private static final Column<TestTable, String> NAME = Column.name(TestTable::setName);
+    private static final Table<TestTable> TABLE = Table.of(TestTable::new, ID, NAME);
 
     @Getter
     @Setter
@@ -29,17 +31,15 @@ public class AllTest {
     @EqualsAndHashCode
     private static class TestTable {
         private Long id;
-        public static final Column<TestTable, Long> ID = Column.id(TestTable::setId);
         private String name;
-        public static final Column<TestTable, String> NAME = Column.name(TestTable::setName);
-        public static final Table<TestTable> TABLE = Table.of(TestTable::new, ID, NAME);
     }
 
     @BeforeClass
     public static void init() {
-        dataSource = new SQLiteDataSource();
+        SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl("jdbc:sqlite:db.sqlite3");
-        try (val transaction = OrmTransaction.of(dataSource)) {
+        ormFactory = new OrmFactory(dataSource);
+        try (val transaction = ormFactory.newTransaction()) {
             transaction.execute("""
                         CREATE TABLE IF NOT EXISTS test_table (
                             id INTEGER PRIMARY KEY,
@@ -58,12 +58,11 @@ public class AllTest {
 
     @Test
     public void testBatch() {
-        try (val transaction = OrmTransaction.of(dataSource)) {
-            val expression = transaction
-                    . "insert OR ignore into test_table (\{ TestTable.TABLE.all() }) values (\{ TestTable.ID }, \{ TestTable.NAME })" ;
+        try (val transaction = ormFactory.newTransaction()) {
+            val expression = transaction.process("insert OR ignore into test_table (id, name) values (?, ?)");
             int batch = 0;
             for (int i = 1; i < 100000; i++, batch++) {
-                expression.setParams((long) i, String.valueOf(i));
+                expression.setParams(i, i);
                 if (batch >= 512) {
                     expression.executeUpdateBatch();
                     expression.clearBatch();
@@ -82,9 +81,9 @@ public class AllTest {
 
     @Test
     public void testTypeHandler() {
-        try (val transaction = OrmTransaction.of(dataSource)) {
+        try (val transaction = ormFactory.newTransaction()) {
             val expression = transaction
-                    . "select name from test_table where id = \{ Integer.class }" ;
+                    .process("select name from test_table where id = ?");
             expression.setParams(0);
             val list = expression.executeQuery(new ObjectTypeHandler());
             Assert.assertEquals(
@@ -99,10 +98,10 @@ public class AllTest {
 
     @Test
     public void testTable() {
-        try (val transaction = OrmTransaction.of(dataSource)) {
+        try (val transaction = ormFactory.newTransaction()) {
             val list = transaction
-                    . "select * from test_table where id = \{ 0 }"
-                    .executeQuery(TestTable.TABLE);
+                    .process("select * from test_table where id = 0")
+                    .executeQuery(TABLE);
             Assert.assertEquals(
                     "size is not 1",
                     1, list.size()
@@ -116,10 +115,10 @@ public class AllTest {
 
     @Test
     public void testColumn() {
-        try (val transaction = OrmTransaction.of(dataSource)) {
+        try (val transaction = ormFactory.newTransaction()) {
             val list = transaction
-                    . "select * from test_table where id = \{ 0 }"
-                    .executeQuery(TestTable.ID);
+                    .process("select * from test_table where id = 0")
+                    .executeQuery(ID);
             Assert.assertEquals(
                     "size is not 1",
                     1, list.size()

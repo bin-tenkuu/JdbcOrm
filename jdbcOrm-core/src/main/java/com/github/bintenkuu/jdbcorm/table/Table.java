@@ -1,6 +1,5 @@
 package com.github.bintenkuu.jdbcorm.table;
 
-import com.github.bintenkuu.jdbcorm.sqlparam.SqlHandler;
 import com.github.bintenkuu.jdbcorm.type.ResultSetHandler;
 import com.github.bintenkuu.jdbcorm.type.TypeHandler;
 import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
@@ -55,10 +54,6 @@ public class Table<E> implements ResultSetHandler<E> {
             list.add(target);
         }
         return list;
-    }
-
-    public SqlHandler all() {
-        return SqlHandler.raw(columns.keySet());
     }
 
     @AllArgsConstructor

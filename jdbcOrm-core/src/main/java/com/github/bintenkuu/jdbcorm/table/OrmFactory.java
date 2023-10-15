@@ -1,7 +1,5 @@
 package com.github.bintenkuu.jdbcorm.table;
 
-import com.github.bintenkuu.jdbcorm.exception.SqlException;
-import com.github.bintenkuu.jdbcorm.sqlparam.SqlPrepareRegister;
 import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +18,6 @@ import java.sql.SQLException;
 public class OrmFactory {
     private final DataSource dataSource;
     private TypeHandlerRegistry typeHandlerRegistry = TypeHandlerRegistry.GLOBAL;
-    private SqlPrepareRegister sqlPrepareRegister = SqlPrepareRegister.GLOBAL;
 
     public OrmTransaction newTransaction() throws SqlException {
         return newTransaction(false);
@@ -31,7 +28,6 @@ public class OrmFactory {
             return new OrmTransaction(
                     dataSource.getConnection(),
                     typeHandlerRegistry,
-                    sqlPrepareRegister,
                     autoCommit);
         } catch (SQLException e) {
             throw new SqlException(e);
@@ -43,7 +39,6 @@ public class OrmFactory {
             return new OrmTransaction(
                     dataSource.getConnection(),
                     typeHandlerRegistry,
-                    sqlPrepareRegister,
                     false
             );
         } catch (SQLException e) {

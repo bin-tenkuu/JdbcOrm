@@ -1,6 +1,5 @@
 package com.github.bintenkuu.jdbcorm.table;
 
-import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

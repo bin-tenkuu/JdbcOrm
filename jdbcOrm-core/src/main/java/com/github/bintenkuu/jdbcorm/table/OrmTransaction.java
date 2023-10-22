@@ -1,7 +1,6 @@
 package com.github.bintenkuu.jdbcorm.table;
 
-import com.github.bintenkuu.jdbcorm.type.ResultSetHandler;
-import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
+import com.github.bintenkuu.jdbcorm.interfaces.ResultSetHandler;
 import lombok.Getter;
 import lombok.val;
 import org.intellij.lang.annotations.Language;
@@ -13,7 +12,8 @@ import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author bin

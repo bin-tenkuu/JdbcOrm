@@ -1,4 +1,6 @@
-package com.github.bintenkuu.jdbcorm.type;
+package com.github.bintenkuu.jdbcorm.interfaces;
+
+import com.github.bintenkuu.jdbcorm.table.TypeHandlerRegistry;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

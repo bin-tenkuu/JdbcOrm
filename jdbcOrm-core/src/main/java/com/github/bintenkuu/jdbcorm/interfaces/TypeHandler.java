@@ -1,5 +1,6 @@
-package com.github.bintenkuu.jdbcorm.type;
+package com.github.bintenkuu.jdbcorm.interfaces;
 
+import com.github.bintenkuu.jdbcorm.table.TypeHandlerRegistry;
 import lombok.val;
 
 import java.sql.PreparedStatement;

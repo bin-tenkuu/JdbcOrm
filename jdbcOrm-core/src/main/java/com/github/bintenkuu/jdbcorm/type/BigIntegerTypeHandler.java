@@ -1,5 +1,7 @@
 package com.github.bintenkuu.jdbcorm.type;
 
+import com.github.bintenkuu.jdbcorm.interfaces.TypeHandler;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;

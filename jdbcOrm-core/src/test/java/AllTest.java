@@ -1,7 +1,8 @@
-import com.github.bintenkuu.jdbcorm.table.Column;
+import com.github.bintenkuu.jdbcorm.interfaces.BaseColumn;
+import com.github.bintenkuu.jdbcorm.interfaces.BaseTable;
 import com.github.bintenkuu.jdbcorm.table.OrmFactory;
-import com.github.bintenkuu.jdbcorm.table.Table;
 import com.github.bintenkuu.jdbcorm.type.ObjectTypeHandler;
+import com.github.bintenkuu.jdbcorm.util.TableUtil;
 import lombok.*;
 import org.junit.*;
 import org.sqlite.SQLiteDataSource;
@@ -20,9 +21,9 @@ public class AllTest {
     public CustomStopwatch stopwatch = new CustomStopwatch();
     private static OrmFactory ormFactory;
 
-    private static final Column<TestTable, Long> ID = Column.id(TestTable::setId);
-    private static final Column<TestTable, String> NAME = Column.name(TestTable::setName);
-    private static final Table<TestTable> TABLE = Table.of(TestTable::new, ID, NAME);
+    private static final BaseColumn<TestTable, Long> ID = TableUtil.columnId(TestTable::setId);
+    private static final BaseColumn<TestTable, String> NAME = TableUtil.columnName(TestTable::setName);
+    private static final BaseTable<TestTable> TABLE = TableUtil.of(TestTable::new, ID, NAME);
 
     @Getter
     @Setter
@@ -42,7 +43,7 @@ public class AllTest {
         try (val transaction = ormFactory.newTransaction()) {
             transaction.execute("""
                         CREATE TABLE IF NOT EXISTS test_table (
-                            id INTEGER PRIMARY KEY,
+                            id INTEGER PRIMARY KEY AUTOINCREMENT ,
                             name TEXT NOT NULL
                         )
                     """);
@@ -59,10 +60,10 @@ public class AllTest {
     @Test
     public void testBatch() {
         try (val transaction = ormFactory.newTransaction()) {
-            val expression = transaction.process("insert OR ignore into test_table (id, name) values (?, ?)");
+            val expression = transaction.process("insert into test_table (name) values (?)");
             int batch = 0;
             for (int i = 1; i < 100000; i++, batch++) {
-                expression.setParams(i, i);
+                expression.setParams(i);
                 if (batch >= 512) {
                     expression.executeUpdateBatch();
                     expression.clearBatch();
@@ -76,7 +77,6 @@ public class AllTest {
             }
             transaction.commit();
         }
-
     }
 
     @Test

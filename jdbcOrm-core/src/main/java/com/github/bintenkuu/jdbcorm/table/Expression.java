@@ -1,7 +1,6 @@
 package com.github.bintenkuu.jdbcorm.table;
 
-import com.github.bintenkuu.jdbcorm.type.ResultSetHandler;
-import com.github.bintenkuu.jdbcorm.type.TypeHandlerRegistry;
+import com.github.bintenkuu.jdbcorm.interfaces.ResultSetHandler;
 import lombok.val;
 
 import java.lang.reflect.Type;
@@ -85,20 +84,19 @@ public class Expression {
         }
     }
 
-    private void initCache() throws SqlException {
-        if (parameterCount >= 0) {
-            return;
-        }
-        try {
-            synchronized (this) {
-                if (parameterCount >= 0) {
-                    return;
+    private int getParameterCount() throws SqlException {
+        if (parameterCount < 0) {
+            try {
+                synchronized (this) {
+                    if (parameterCount < 0) {
+                        parameterCount = preparedStatement.getParameterMetaData().getParameterCount();
+                    }
                 }
-                parameterCount = preparedStatement.getParameterMetaData().getParameterCount();
+            } catch (SQLException e) {
+                throw new SqlException(e);
             }
-        } catch (SQLException e) {
-            throw new SqlException(e);
         }
+        return parameterCount;
     }
 
     public void setParams(Object... parameters) {
@@ -106,9 +104,9 @@ public class Expression {
     }
 
     public void setParameters(Object[] parameters) throws SqlException {
-        initCache();
+        val parameterCount = getParameterCount();
         try {
-            if (this.parameterCount != parameters.length) {
+            if (parameterCount != parameters.length) {
                 val string = STR. "paramLength must be \{ parameterCount }, current : \{ parameters.length }" ;
                 throw new IllegalArgumentException(string);
             }

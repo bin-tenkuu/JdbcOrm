@@ -10,9 +10,13 @@ module jdbcOrm.core {
 
     exports com.github.bintenkuu.jdbcorm.table;
     exports com.github.bintenkuu.jdbcorm.type;
+    exports com.github.bintenkuu.jdbcorm.util;
+    exports com.github.bintenkuu.jdbcorm.interfaces;
 
-    uses com.github.bintenkuu.jdbcorm.type.ResultSetHandler;
-    uses com.github.bintenkuu.jdbcorm.type.TypeHandler;
+    uses com.github.bintenkuu.jdbcorm.interfaces.ResultSetHandler;
+    uses com.github.bintenkuu.jdbcorm.interfaces.TypeHandler;
+    uses com.github.bintenkuu.jdbcorm.interfaces.BaseColumn;
+    uses com.github.bintenkuu.jdbcorm.interfaces.BaseTable;
 
-    opens com.github.bintenkuu.jdbcorm.type;
+    opens com.github.bintenkuu.jdbcorm.interfaces;
 }

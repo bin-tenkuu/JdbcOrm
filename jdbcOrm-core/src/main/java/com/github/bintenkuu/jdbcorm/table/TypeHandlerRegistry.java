@@ -1,5 +1,7 @@
-package com.github.bintenkuu.jdbcorm.type;
+package com.github.bintenkuu.jdbcorm.table;
 
+import com.github.bintenkuu.jdbcorm.interfaces.TypeHandler;
+import com.github.bintenkuu.jdbcorm.type.*;
 import lombok.val;
 
 import java.lang.reflect.ParameterizedType;

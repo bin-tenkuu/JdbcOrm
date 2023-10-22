@@ -1,9 +1,11 @@
 package com.github.bintenkuu.jdbcorm.type;
 
+import com.github.bintenkuu.jdbcorm.interfaces.TypeHandler;
+
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
 
 /**
  * @author bin

@@ -38,7 +38,6 @@ public class TableUtil {
         return column("name", String.class, setter);
     }
 
-
     public static <E> BaseTable<E> of(
             Supplier<E> newer,
             Map<String, ? extends BaseColumn<? super E, ?>> map

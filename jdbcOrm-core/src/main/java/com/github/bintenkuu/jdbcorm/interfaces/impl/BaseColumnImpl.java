@@ -10,4 +10,10 @@ public record BaseColumnImpl<E, T>(
         BiConsumer<E, T> setter
 ) implements BaseColumn<E, T> {
 
+    @Override
+    public String toString() {
+        return name + " " + typeClass;
+    }
+
+
 }

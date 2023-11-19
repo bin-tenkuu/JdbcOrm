@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author bin
@@ -29,4 +30,33 @@ public interface TypeHandler<T> extends ResultSetHandler<T> {
         return list;
     }
 
+//    default TableField<T> withName(String name) {
+//        return TableField.of(name, this);
+//    }
+
+    default <R> TypeHandler<R> wrapper(Function<? super T, ? extends R> unwrapped, Function<? super R, ? extends T> wrapper) {
+        return new TypeHandlerWrapper<>(this, wrapper, unwrapped);
+    }
+
+    record TypeHandlerWrapper<Raw, T>(
+            TypeHandler<Raw> type,
+            Function<? super T, ? extends Raw> unwrapped,
+            Function<? super Raw, ? extends T> wrapper
+    ) implements TypeHandler<T> {
+
+        @Override
+        public void setParameter(PreparedStatement ps, int i, T parameter) throws SQLException {
+            val raw = unwrapped.apply(parameter);
+            type.setParameter(ps, i, raw);
+        }
+
+        @Override
+        public T getResult(ResultSet rs, int columnIndex) throws SQLException {
+            val raw = type.getResult(rs, columnIndex);
+            if (raw == null) {
+                return null;
+            }
+            return wrapper.apply(raw);
+        }
+    }
 }

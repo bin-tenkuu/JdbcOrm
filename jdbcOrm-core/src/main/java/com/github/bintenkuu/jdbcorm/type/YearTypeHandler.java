@@ -12,6 +12,8 @@ import java.time.Year;
  * @since 2023/10/08
  */
 public class YearTypeHandler implements TypeHandler<Year> {
+    public static final YearTypeHandler INSTANCE = new YearTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Year parameter) throws SQLException {
         ps.setInt(i, parameter.getValue());

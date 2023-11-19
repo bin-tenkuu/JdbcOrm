@@ -12,6 +12,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class SqlDateTypeHandler implements TypeHandler<Date> {
+    public static final SqlDateTypeHandler INSTANCE = new SqlDateTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Date parameter) throws SQLException {
         ps.setDate(i, parameter);

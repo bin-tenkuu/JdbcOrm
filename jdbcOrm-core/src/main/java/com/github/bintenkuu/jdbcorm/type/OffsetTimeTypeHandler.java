@@ -12,6 +12,8 @@ import java.time.OffsetTime;
  * @since 2023/10/08
  */
 public class OffsetTimeTypeHandler implements TypeHandler<OffsetTime> {
+    public static final OffsetTimeTypeHandler INSTANCE = new OffsetTimeTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, OffsetTime parameter) throws SQLException {
         ps.setObject(i, parameter);

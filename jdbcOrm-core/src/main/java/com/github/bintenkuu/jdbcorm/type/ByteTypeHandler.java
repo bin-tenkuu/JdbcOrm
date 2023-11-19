@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class ByteTypeHandler implements TypeHandler<Byte> {
+    public static final ByteTypeHandler INSTANCE = new ByteTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Byte parameter) throws SQLException {
         ps.setByte(i, parameter);

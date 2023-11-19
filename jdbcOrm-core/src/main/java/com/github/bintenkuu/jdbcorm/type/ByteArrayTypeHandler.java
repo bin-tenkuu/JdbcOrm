@@ -11,6 +11,7 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class ByteArrayTypeHandler implements TypeHandler<byte[]> {
+    public static ByteArrayTypeHandler INSTANCE = new ByteArrayTypeHandler();
 
     @Override
     public void setParameter(PreparedStatement ps, int i, byte[] parameter) throws SQLException {

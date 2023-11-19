@@ -12,6 +12,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class BigDecimalTypeHandler implements TypeHandler<BigDecimal> {
+    public static final BigDecimalTypeHandler INSTANCE = new BigDecimalTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, BigDecimal parameter) throws SQLException {
         ps.setBigDecimal(i, parameter);

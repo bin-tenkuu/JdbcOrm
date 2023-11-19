@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class ShortTypeHandler implements TypeHandler<Short> {
+    public static final ShortTypeHandler INSTANCE = new ShortTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Short parameter) throws SQLException {
         ps.setShort(i, parameter);

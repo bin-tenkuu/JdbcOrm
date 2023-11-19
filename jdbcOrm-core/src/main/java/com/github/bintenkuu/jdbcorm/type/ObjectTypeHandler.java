@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/09
  */
 public class ObjectTypeHandler implements TypeHandler<Object> {
+    public static final ObjectTypeHandler INSTANCE = new ObjectTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Object parameter) throws SQLException {
         ps.setObject(i, parameter);

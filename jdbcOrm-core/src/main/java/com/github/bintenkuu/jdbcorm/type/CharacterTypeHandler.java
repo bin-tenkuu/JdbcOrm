@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class CharacterTypeHandler implements TypeHandler<Character> {
+    public static final CharacterTypeHandler INSTANCE = new CharacterTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Character parameter) throws SQLException {
         ps.setString(i, parameter.toString());

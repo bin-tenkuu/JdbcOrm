@@ -13,6 +13,8 @@ import java.time.Instant;
  * @since 2023/10/08
  */
 public class InstantTypeHandler implements TypeHandler<Instant> {
+    public static final InstantTypeHandler INSTANCE = new InstantTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Instant parameter) throws SQLException {
         ps.setTimestamp(i, Timestamp.from(parameter));

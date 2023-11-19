@@ -14,6 +14,8 @@ import java.time.chrono.JapaneseDate;
  * @since 2023/10/08
  */
 public class JapaneseDateTypeHandler implements TypeHandler<JapaneseDate> {
+    public static final JapaneseDateTypeHandler INSTANCE = new JapaneseDateTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, JapaneseDate parameter) throws SQLException {
         ps.setDate(i, Date.valueOf(LocalDate.ofEpochDay(parameter.toEpochDay())));

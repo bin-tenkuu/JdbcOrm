@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
  * @since 2023/10/08
  */
 public class LocalDateTimeTypeHandler implements TypeHandler<LocalDateTime> {
+    public static final LocalDateTimeTypeHandler INSTANCE = new LocalDateTimeTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, LocalDateTime parameter) throws SQLException {
         ps.setObject(i, parameter);

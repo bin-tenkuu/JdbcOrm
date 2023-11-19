@@ -12,6 +12,8 @@ import java.time.Month;
  * @since 2023/10/08
  */
 public class MonthTypeHandler implements TypeHandler<Month> {
+    public static final MonthTypeHandler INSTANCE = new MonthTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Month parameter) throws SQLException {
         ps.setInt(i, parameter.getValue());

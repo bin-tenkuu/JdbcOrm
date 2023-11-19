@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class IntegerTypeHandler implements TypeHandler<Integer> {
+    public static final IntegerTypeHandler INSTANCE = new IntegerTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Integer parameter) throws SQLException {
         ps.setInt(i, parameter);

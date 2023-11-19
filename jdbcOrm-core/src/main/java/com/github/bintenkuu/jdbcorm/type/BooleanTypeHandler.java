@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class BooleanTypeHandler implements TypeHandler<Boolean> {
+    public static final BooleanTypeHandler INSTANCE = new BooleanTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Boolean parameter) throws SQLException {
         ps.setBoolean(i, parameter);

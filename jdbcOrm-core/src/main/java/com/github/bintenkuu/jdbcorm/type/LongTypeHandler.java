@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class LongTypeHandler implements TypeHandler<Long> {
+    public static final LongTypeHandler INSTANCE = new LongTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Long parameter) throws SQLException {
         ps.setLong(i, parameter);

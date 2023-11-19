@@ -13,6 +13,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class BigIntegerTypeHandler implements TypeHandler<BigInteger> {
+    public static final BigIntegerTypeHandler INSTANCE = new BigIntegerTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, BigInteger parameter) throws SQLException {
         ps.setBigDecimal(i, new BigDecimal(parameter));

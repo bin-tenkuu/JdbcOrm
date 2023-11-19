@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class FloatTypeHandler implements TypeHandler<Float> {
+    public static final FloatTypeHandler INSTANCE = new FloatTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Float parameter) throws SQLException {
         ps.setFloat(i, parameter);

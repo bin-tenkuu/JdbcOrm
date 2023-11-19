@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
  * @since 2023/10/08
  */
 public class ZonedDateTimeTypeHandler implements TypeHandler<ZonedDateTime> {
+    public static final ZonedDateTimeTypeHandler INSTANCE = new ZonedDateTimeTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, ZonedDateTime parameter) throws SQLException {
         ps.setObject(i, parameter);

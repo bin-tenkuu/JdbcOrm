@@ -11,6 +11,8 @@ import java.sql.SQLException;
  * @since 2023/10/08
  */
 public class DoubleTypeHandler implements TypeHandler<Double> {
+    public static final DoubleTypeHandler INSTANCE = new DoubleTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Double parameter) throws SQLException {
         ps.setDouble(i, parameter);

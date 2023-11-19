@@ -12,6 +12,8 @@ import java.sql.Timestamp;
  * @since 2023/10/08
  */
 public class SqlTimestampTypeHandler implements TypeHandler<Timestamp> {
+    public static final SqlTimestampTypeHandler INSTANCE = new SqlTimestampTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Timestamp parameter) throws SQLException {
         ps.setTimestamp(i, parameter);

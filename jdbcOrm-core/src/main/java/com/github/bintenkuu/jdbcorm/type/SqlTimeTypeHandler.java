@@ -11,6 +11,8 @@ import java.sql.Time;
  * @since 2023/10/08
  */
 public class SqlTimeTypeHandler implements TypeHandler<Time> {
+    public static final SqlTimeTypeHandler INSTANCE = new SqlTimeTypeHandler();
+
     @Override
     public void setParameter(PreparedStatement ps, int i, Time parameter) throws SQLException {
         ps.setTime(i, parameter);

@@ -1,5 +1,5 @@
 import com.github.bintenkuu.jdbcorm.interfaces.BaseColumn;
-import com.github.bintenkuu.jdbcorm.interfaces.BaseTable;
+import com.github.bintenkuu.jdbcorm.interfaces.ResultSetHandler;
 import com.github.bintenkuu.jdbcorm.table.OrmFactory;
 import com.github.bintenkuu.jdbcorm.type.ObjectTypeHandler;
 import com.github.bintenkuu.jdbcorm.util.TableUtil;
@@ -15,6 +15,7 @@ import java.nio.file.Paths;
  * @author bin
  * @since 2023/10/09
  */
+@SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 public class AllTest {
 
     @Rule
@@ -23,7 +24,7 @@ public class AllTest {
 
     private static final BaseColumn<TestTable, Long> ID = TableUtil.columnId(TestTable::setId);
     private static final BaseColumn<TestTable, String> NAME = TableUtil.columnName(TestTable::setName);
-    private static final BaseTable<TestTable> TABLE = TableUtil.of(TestTable::new, ID, NAME);
+    private static final ResultSetHandler<TestTable> TABLE = TableUtil.of(TestTable::new, ID, NAME);
 
     @Getter
     @Setter
@@ -91,7 +92,7 @@ public class AllTest {
                     1, list.size()
             );
             Assert.assertEquals(
-                    "0", list.get(0)
+                    "0", list.getFirst()
             );
         }
     }
@@ -108,7 +109,7 @@ public class AllTest {
             );
             Assert.assertEquals(
                     new TestTable(0L, "0"),
-                    list.get(0)
+                    list.getFirst()
             );
         }
     }
@@ -124,7 +125,7 @@ public class AllTest {
                     1, list.size()
             );
             Assert.assertEquals(
-                    Long.valueOf(0L), list.get(0)
+                    Long.valueOf(0L), list.getFirst()
             );
         }
     }

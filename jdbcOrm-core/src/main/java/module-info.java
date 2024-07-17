@@ -15,8 +15,6 @@ module jdbcOrm.core {
 
     uses com.github.bintenkuu.jdbcorm.interfaces.ResultSetHandler;
     uses com.github.bintenkuu.jdbcorm.interfaces.TypeHandler;
-    uses com.github.bintenkuu.jdbcorm.interfaces.BaseColumn;
-    uses com.github.bintenkuu.jdbcorm.interfaces.BaseTable;
 
     opens com.github.bintenkuu.jdbcorm.interfaces;
 }

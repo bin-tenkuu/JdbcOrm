@@ -32,16 +32,4 @@ public class OrmFactory {
             throw new SqlException(e);
         }
     }
-
-    public OrmTransaction newTransaction(DataSource dataSource) throws SqlException {
-        try {
-            return new OrmTransaction(
-                    dataSource.getConnection(),
-                    typeHandlerRegistry,
-                    false
-            );
-        } catch (SQLException e) {
-            throw new SqlException(e);
-        }
-    }
 }

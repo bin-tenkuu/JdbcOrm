@@ -13,17 +13,16 @@ import java.util.function.Supplier;
 
 /**
  * @author bin
- * @version 1.0.0
- * @since 2023/10/22
+ * @since 2023/08/31
  */
-public interface BaseTable<E> extends ResultSetHandler<E> {
-    Supplier<E> newer();
-
-    Map<String, ? extends BaseColumn<? super E, ?>> columns();
+public record BaseTable<E>(
+        Supplier<E> newer,
+        Map<String, ? extends BaseColumn<? super E, ?>> columns
+) implements ResultSetHandler<E> {
 
     @SuppressWarnings("unchecked")
     @Override
-    default List<E> getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry) throws SQLException {
+    public List<E> getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry) throws SQLException {
         val metaData = resultSet.getMetaData();
         val columnCount = metaData.getColumnCount();
         val columns = columns();

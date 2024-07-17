@@ -9,20 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-/**
- * @author bin
- * @version 1.0.0
- * @since 2023/10/22
- */
-public interface BaseColumn<E, T> extends ResultSetHandler<T> {
-    String name();
-
-    Class<T> typeClass();
-
-    BiConsumer<E, T> setter();
+public record BaseColumn<E, T>(
+        String name,
+        Class<T> typeClass,
+        BiConsumer<E, T> setter
+) implements ResultSetHandler<T> {
 
     @Override
-    default List<T> getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry) throws SQLException {
+    public String toString() {
+        return typeClass + " " + name;
+    }
+
+    @Override
+    public List<T> getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry) throws SQLException {
         val metaData = resultSet.getMetaData();
         TypeHandler<T> typeHandler = typeHandlerRegistry.getTypeHandler(typeClass());
         int index = 0;
@@ -42,5 +41,4 @@ public interface BaseColumn<E, T> extends ResultSetHandler<T> {
         }
         return list;
     }
-
 }

@@ -30,7 +30,8 @@ public interface TypeHandler<T> extends ResultSetHandler<T> {
         return list;
     }
 
-    default <R> TypeHandler<R> wrapper(Function<? super T, ? extends R> unwrapped, Function<? super R, ? extends T> wrapper) {
+    default <R> TypeHandler<R> wrapper(Function<? super T, ? extends R> unwrapped,
+            Function<? super R, ? extends T> wrapper) {
         return new TypeHandlerWrapper<>(this, wrapper, unwrapped);
     }
 

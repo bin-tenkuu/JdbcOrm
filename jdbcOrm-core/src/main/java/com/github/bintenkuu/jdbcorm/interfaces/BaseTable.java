@@ -25,22 +25,18 @@ public record BaseTable<E>(
     public List<E> getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry) throws SQLException {
         val metaData = resultSet.getMetaData();
         val columnCount = metaData.getColumnCount();
-        val columns = columns();
-        val typeHandlers = new TypeHandler[columnCount];
-        val setters = new BiConsumer[columnCount];
-        for (int i = 0, length = setters.length; i < length; i++) {
+        val sortColumns = (BaseColumn<? super E, ?>[]) new BaseColumn<?, ?>[columnCount];
+        for (int i = 0; i < columnCount; i++) {
             val label = metaData.getColumnLabel(i + 1);
-            val column = columns.get(label);
-            typeHandlers[i] = typeHandlerRegistry.getTypeHandler(column.typeClass());
-            setters[i] = column.setter();
+            sortColumns[i] = columns.get(label);
         }
-        val newer = newer();
         val list = new ArrayList<E>();
         while (resultSet.next()) {
             val target = newer.get();
             for (int i = 0; i < columnCount; i++) {
-                val result = typeHandlers[i].getResult(resultSet, i + 1);
-                setters[i].accept(target, result);
+                val sortColumn = sortColumns[i];
+                val result = typeHandlerRegistry.getTypeHandler(sortColumn.typeClass()).getResult(resultSet, i + 1);
+                ((BiConsumer<E, Object>) sortColumn.setter()).accept(target, result);
             }
             list.add(target);
         }

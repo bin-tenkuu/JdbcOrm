@@ -3,28 +3,33 @@ package com.github.bintenkuu.jdbcorm.interfaces;
 import com.github.bintenkuu.jdbcorm.table.TypeHandlerRegistry;
 import lombok.val;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
-public record BaseColumn<E, T>(
-        String name,
-        Class<T> typeClass,
-        BiConsumer<E, T> setter
-) implements ResultSetHandler<T> {
+/**
+ * @author bin
+ * @version 1.0.0
+ * @since 2024/07/18
+ */
+public final class SampleColumn<T> implements ResultSetHandler<T> {
+    private final Field field;
+    private final Class<T> type;
+    private final String name;
 
-    public T getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry, int columnIndex)
-            throws SQLException {
-        TypeHandler<T> typeHandler = typeHandlerRegistry.getTypeHandler(typeClass);
-        return typeHandler.getResult(resultSet, columnIndex);
+    public SampleColumn(Field field) {
+        this.field = field;
+        field.setAccessible(true);
+        this.type = (Class<T>) field.getType();
+        this.name = field.getName();
     }
 
     @Override
     public List<T> getResult(ResultSet resultSet, TypeHandlerRegistry typeHandlerRegistry) throws SQLException {
         val metaData = resultSet.getMetaData();
-        TypeHandler<T> typeHandler = typeHandlerRegistry.getTypeHandler(typeClass);
+        TypeHandler<T> typeHandler = typeHandlerRegistry.getTypeHandler(type);
         int index = 0;
         for (int i = 1, length = metaData.getColumnCount(); i <= length; i++) {
             val label = metaData.getColumnLabel(i);
